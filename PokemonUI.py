@@ -1,6 +1,10 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import pandas as pd
+import matplotlib
+matplotlib.use("TkAgg")
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from PIL import ImageTk, Image
 from PokemonFacadeController import PokemonFacadeController
 class App(tk.Tk):
@@ -10,8 +14,8 @@ class App(tk.Tk):
         self.facade = PokemonFacadeController()
         self.frame = None
         self.create_button_frame()
-        self.switch_page(PokemonStatPage(self))
-        self.geometry("700x500")
+        self.switch_page(PokemonGraphPage(self))
+        self.geometry("1000x750")
         self.title("Pokémon Scuffed Buddy")
 
     def switch_page(self, page):
@@ -26,9 +30,11 @@ class App(tk.Tk):
         self.button1 = tk.Button(self.button_frame, text="Pokemon Stat",command=lambda: self.switch_page(PokemonStatPage(self)))
         self.button2 = tk.Button(self.button_frame, text="Pokemon Graph", command=lambda: self.switch_page(PokemonGraphPage(self)))
         self.button3 = tk.Button(self.button_frame, text="Pokemon Compare", command=lambda: self.switch_page(PokemonComparePage(self)))
+        self.button4 = tk.Button(self.button_frame, text="quit", command=self.destroy)
         self.button1.grid(row=0, column=1, sticky="WE", padx=(10, 10))
         self.button2.grid(row=0, column=0, sticky="WE", padx=(10, 10))
         self.button3.grid(row=0, column=2, sticky="WE", padx=(10, 10))
+        self.button4.grid(row=0, column=3, sticky="WE", padx=(10, 10))
         self.button_frame.grid(row=0, column=0, sticky="W")
         
         
@@ -48,8 +54,8 @@ class PokemonStatPage(tk.Frame):
         """
         self.frame1 = ttk.Frame(self)
         self.frame2 = ttk.Frame(self)
-        self.frame1.grid(row = 0, column=0, padx=(50, 50), sticky="WE")
-        self.frame2.grid(row = 0, column=1)
+        self.frame1.grid(row = 0, column=0, padx=(50, 50), sticky="W")
+        self.frame2.grid(row = 0, column=1,sticky="E")
         self.frame1_widget()
         self.frame2_widget()
 
@@ -108,40 +114,40 @@ class PokemonStatPage(tk.Frame):
         #place into program
         self.poke_image_label.grid(row=0, sticky="EW", columnspan=2)
         
-        self.type.grid(row=1, column=0, sticky="WE", columnspan=2)
+        self.type.grid(row=1, column=0, sticky="EW", columnspan=2)
         
         self.pokedex_num.grid(row=2, column=0, sticky="W")
-        self.pokedex_num_val.grid(row=2, column=1, sticky="W")
+        self.pokedex_num_val.grid(row=2, column=1, sticky="E")
         
         self.name.grid(row=3, column=0, sticky="W")
-        self.name_value.grid(row=3, column=1, sticky="W")
+        self.name_value.grid(row=3, column=1, sticky="E")
 
         self.total.grid(row=4, column=0, sticky="W")
-        self.total_val.grid(row=4, column=1, sticky="W")
+        self.total_val.grid(row=4, column=1, sticky="E")
         
         self.hp.grid(row=5, column=0, sticky="W")
-        self.hp_val.grid(row=5, column=1, sticky="W")
+        self.hp_val.grid(row=5, column=1, sticky="E")
         
         self.attack.grid(row=6, column=0, sticky="W")
-        self.attack_val.grid(row=6, column=1, sticky="W")
+        self.attack_val.grid(row=6, column=1, sticky="E")
         
         self.defense.grid(row=7, column=0, sticky="W")
-        self.defense_val.grid(row=7, column=1, sticky="W")
+        self.defense_val.grid(row=7, column=1, sticky="E")
         
         self.sp_atk.grid(row=7, column=0, sticky="W")
-        self.sp_atk_val.grid(row=7, column=1, sticky="W")
+        self.sp_atk_val.grid(row=7, column=1, sticky="E")
         
-        self.sp_def.grid(row=8, column=0, sticky="W", padx=(0,15))
-        self.sp_def_val.grid(row=8, column=1, sticky="W")
+        self.sp_def.grid(row=8, column=0, sticky="W")
+        self.sp_def_val.grid(row=8, column=1, sticky="E")
         
         self.speed.grid(row=9, column=0, sticky="W")
-        self.speed_val.grid(row=9, column=1, sticky="W")
+        self.speed_val.grid(row=9, column=1, sticky="E")
         
         self.gen.grid(row=10, column=0, sticky="W")
-        self.gen_val.grid(row=10, column=1, sticky="W")
+        self.gen_val.grid(row=10, column=1, sticky="E")
         
         self.legen.grid(row=11, column=0, sticky="W")
-        self.legen_val.grid(row=11, column=1, sticky="W")
+        self.legen_val.grid(row=11, column=1, sticky="E")
 
     def frame2_widget(self):
         """
@@ -149,7 +155,7 @@ class PokemonStatPage(tk.Frame):
         """
         frame = self.frame2
         # create tree view for select pokemon
-        self.poke_list = ttk.Treeview(frame, columns=("pokedex #", "Name"), show='headings', selectmode='browse', height=24)
+        self.poke_list = ttk.Treeview(frame, columns=("pokedex #", "Name"), show='headings', selectmode='browse', height=35)
         # name the column
         self.poke_list.heading("pokedex #", text="pokedex #")
         self.poke_list.column("pokedex #", width=75)
@@ -192,7 +198,7 @@ class PokemonStatPage(tk.Frame):
         # change poke info
         self.type["text"] = f"{self.current_pokemon_data_frame['Type 1']} {self.current_pokemon_data_frame['Type 2']}"
         self.pokedex_num_val["text"] = self.current_pokemon_data_frame["#"]
-        self.name_value = tk.Label(frame, text=self.current_pokemon_data_frame['Name']) 
+        self.name_value["text"] = self.current_pokemon_data_frame['Name']
         self.total_val["text"] = self.current_pokemon_data_frame["Total"]
         self.hp_val["text"] = self.current_pokemon_data_frame["HP"]
         self.attack_val["text"] = self.current_pokemon_data_frame["Attack"]
@@ -207,7 +213,7 @@ class PokemonStatPage(tk.Frame):
 class PokemonGraphPage(tk.Frame):
     def  __init__(self, master):
         super().__init__(master)
-        self.master = master
+        self.facade = master.facade
         self.create_frame()
 
     def create_frame(self):
@@ -216,17 +222,51 @@ class PokemonGraphPage(tk.Frame):
         """
         self.frame1 = ttk.Frame(self)
         self.frame2 = ttk.Frame(self)
-        self.frame1.grid(row = 0, column=0,)
-        self.frame2.grid(row = 0, column=1)
-        # self.frame1_widget()
+        self.frame1.grid(row = 0, column=0, sticky="N")
+        self.frame2.grid(row = 0, column=1, sticky="N")
+        self.frame1_widget()
         self.frame2_widget() 
-        
+    
+    def frame1_widget(self):
+        frame = self.frame1
+        self.fig = Figure(figsize=(6,6))
+        self.axes = self.fig.add_subplot()
+        self.facade.get_relationship_g("Attack", "Defense", self.axes)
+        self.casvas = FigureCanvasTkAgg(self.fig, master=frame)
+        self.casvas.get_tk_widget().grid()
+        self.casvas.draw()
+    
     def frame2_widget(self):
         """
         """
+        # create tree for selecting graph
         frame = self.frame2
-        self.graph_list = ttk.Treeview(frame)
+        self.graph_list = ttk.Treeview(frame, columns=("Graph"), show='headings', selectmode='browse', height=35)
+        self.graph_list.heading("Graph", text="Graph")
+        self.graph_list.column("Graph", width=375)
+        self.graph_list.bind("<<TreeviewSelect>>",self.update_plot)
+        self.add_selecting_graph()
         self.graph_list.pack()
+        
+    def add_selecting_graph(self):
+        list = self.graph_list
+        list.insert(parent="", index="end", values="Distibution\ of\ Attack")
+        list.insert(parent="", index="end", values="Distibution\ of\ Defense")
+        list.insert(parent="", index="end", values="Distibution\ of\ Hitpoint")
+        list.insert(parent="", index="end", values="Distibution\ of\ Special Attack")
+        list.insert(parent="", index="end", values="Distibution\ of\ Special Defens")
+        list.insert(parent="", index="end", values="Distibution\ of\ Speed")
+        list.insert(parent="", index="end", values="Network\ Graph\ of\ Type\ Chart")
+        list.insert(parent="", index="end", values="Network\ Graph\ of\ Fire\ Type")
+        list.insert(parent="", index="end", values="Network\ Graph\ of\ Water\ Type")
+        list.insert(parent="", index="end", values="Network\ Graph\ of\ Grass\ Type")
+        list.insert(parent="", index="end", values="Relationship\ between\ Attack\ and\ Defense")
+        list.insert(parent="", index="end", values="Relationship\ between\ Special\ Attack\ and\ Special\ Defense")
+        list.insert(parent="", index="end", values="Relationship\ between\ Hitpoint\ and\ Speed")
+        
+        
+    def update_plot(self, event):
+        pass
 
 class PokemonComparePage(tk.Frame):
     def  __init__(self, master):

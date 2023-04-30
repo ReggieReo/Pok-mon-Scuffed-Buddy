@@ -15,11 +15,11 @@ class PokemonFacadeController:
     def get_pokemon_data(self):
         return self.__manager.get_pokemon_data()
     
-    def get_main_type_frequency_g(self):
-        return self.__manager.get_all_type_network_g()
+    def get_main_type_frequency_g(self, ax):
+        return self.__manager.get_main_type_frequency_g(ax)
     
-    def get_relationship_g(self, type1: str, type2: str):
-        return self.__manager.get_relationship_g(type1=type1, type2=type2)
+    def get_relationship_g(self, type1: str, type2: str, ax):
+        return self.__manager.get_relationship_g(type1, type2, ax)
     
     def get_attribute_dis_g(self, attribute: str):
         return self.__manager.get_attribute_dis_g(attribute)
@@ -49,10 +49,11 @@ class PokemonFacadeController:
 if __name__ == "__main__":
     pokemon_controller = PokemonFacadeController()
     # pokemon_controller.get_all_type_network_g()
-    # pokemon_controller.get_attribute_dis_g("Attack")
+    fig, des = pokemon_controller.get_attribute_dis_g("Attack")
     # # pokemon_controller.get_generation_part_to_whole_g()
     # pokemon_controller.get_one_type_chart_g("Normal")
     # poke = pokemon_controller.get_pokemon_object("pikachu")
     # plt.show()
     # print(type(poke.get_type2()))
-    print(pokemon_controller.get_pokemon_data())
+    print(f"{des['mean']:.2f}")
+    # print(pokemon_controller.get_pokemon_data())

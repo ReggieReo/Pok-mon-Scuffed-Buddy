@@ -15,47 +15,34 @@ class PokemonManager:
     def get_pokemon_data(self):
         return self.__pokemon_data
 
-    def get_main_type_frequency_g(self):  # frequency graph of main type
-        figure = plt.figure(figsize=(12, 5))
-        ax = self.__pokemon_data["Type 1"].value_counts().plot.bar()
+    def get_main_type_frequency_g(self, ax):  # frequency graph of main type
+        # figure = plt.figure()
+        ax = self.__pokemon_data["Type 1"].value_counts().plot.bar(ax=ax)
         ax.set_title("Main type Frequency")
-        return figure
+        # return figure
 
-    def get_relationship_g(self, type1, type2):  # scatterplot of attack and defense
-        figure = plt.figure(figsize=(12, 6))
+    def get_relationship_g(self, type1, type2, ax):  # scatterplot of two attibute
         ax = sns.scatterplot(
             data=self.__pokemon_data, x=type1, y=type2, hue="Generation"
-        )
-        figure.suptitle("Scatterplot of attack and defense")
-        return figure
+        , ax=ax)
+        return ax
 
-    def get_attribute_dis_g(self, attribute):  # distribution graph of attack
-        figure = plt.figure(figsize=(12, 6))
-        ax = sns.histplot(
-            data=self.__pokemon_data[attribute],
-        )
-        return figure
+    def get_attribute_dis_g(self, attribute, ax):  # distribution graph of attack
+        sns.histplot(data=self.__pokemon_data[attribute], ax=ax)
+        return self.__pokemon_data[attribute].describe()
 
-    def get_generation_part_to_whole_g(self):  # part of whole graph of generation
-        # figure = plt.figure(figsize=(12, 6))
-        plot = (
-            self.__pokemon_data["Generation"]
-            .value_counts()
-            .sort_index()
-            .plot(
+    def get_generation_part_to_whole_g(self, ax):  # part of whole graph of generation
+            self.__pokemon_data["Generation"].value_counts().sort_index().plot(
                 kind="pie",
                 y="Generation",
                 title="lol",
                 autopct="%.2f%%",
-                figsize=(12, 6),
                 legend=True,
-            )
-        )
-        return plot
+                ax=ax
+                )
 
-    def get_all_type_network_g(self):
+    def get_all_type_network_g(self, ax): # all type to all type network
         G = nx.DiGraph()
-        figure = plt.figure(figsize=(12, 6))
         df = self.__type_data.copy()
         df.set_index("Attacking", inplace=True)
         for label, content in df.items():
@@ -65,10 +52,9 @@ class PokemonManager:
                 if l != 0:
                     G.add_edge(u_of_edge=label, v_of_edge=type2, weight=l)
         pos = nx.circular_layout(G)
-        plot = nx.draw(G, pos=pos, with_labels=True)
-        return figure
+        nx.draw(G, pos=pos, with_labels=True, ax=ax)
 
-    def get_one_type_chart_g(self, type: str):
+    def get_one_type_chart_g(self, type: str, ax): # one type to all network 
         df = self.__type_data.set_index("Attacking")[type]
         G = nx.DiGraph()
         for node in df.index:
@@ -76,20 +62,17 @@ class PokemonManager:
         for type2, effectiveness in df.items():
             if effectiveness != 0:
                 G.add_edge(u_of_edge=type, v_of_edge=type2, weight=effectiveness)
-        figure = plt.figure(figsize=(12, 6))
         pos = nx.shell_layout(G)
         plot = nx.draw(G, pos=pos, with_labels=True)
         weight = nx.get_edge_attributes(G, "weight")
-        nx.draw_networkx_edge_labels(G, pos, edge_labels=weight)
-        return figure
-
+        nx.draw_networkx_edge_labels(G, pos, edge_labels=weight, ax=ax)
 
 if __name__ == "__main__":
     manager = PokemonManager()
-    # manager.get_attack_defense_relationship_g()
-    # manager.get_main_type_frequency_g()
-    # manager.get_attribute_dis_g("Attack")
-    # manager.get_generation_part_to_whole_g()
-    manager.get_all_type_network_g()
-    # manager.get_one_type_chart_g("Normal")
+    fig = plt.figure(figsize=(6, 6))
+    ax = fig.add_subplot()
+    # manager.get_generation_part_to_whole_g(ax)
+    # manager.get_all_type_network_g(ax)
+    manager.get_one_type_chart_g("Normal", ax)
     plt.show()
+    # print(des)
