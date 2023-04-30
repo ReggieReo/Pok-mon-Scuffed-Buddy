@@ -3,7 +3,6 @@ import tkinter.ttk as ttk
 import pandas as pd
 from PIL import ImageTk, Image
 from PokemonFacadeController import PokemonFacadeController
-
 class App(tk.Tk):
 
     def __init__(self):
@@ -49,7 +48,7 @@ class PokemonStatPage(tk.Frame):
         """
         self.frame1 = ttk.Frame(self)
         self.frame2 = ttk.Frame(self)
-        self.frame1.grid(row = 0, column=0)
+        self.frame1.grid(row = 0, column=0, padx=(50, 50), sticky="WE")
         self.frame2.grid(row = 0, column=1)
         self.frame1_widget()
         self.frame2_widget()
@@ -65,45 +64,46 @@ class PokemonStatPage(tk.Frame):
         
         # name_label = tk.Label(frame, text="lol")
         # name_label.grid()
+
         self.image_path = "data/sprite/393.png"
-        self.image = ImageTk.PhotoImage(Image.open(self.image_path))
+        self.image = ImageTk.PhotoImage(Image.open(self.image_path).resize((192, 192)))
         self.poke_image_label = tk.Label(frame)
         self.poke_image_label["image"] = self.image
         
-        self.type = tk.Label(frame, text=f"{self.current_pokemon_data_frame['Type 1']} {self.current_pokemon_data_frame['Type 2']}")
+        self.type = tk.Label(frame, text=f"{self.current_pokemon_data_frame['Type 1']} {self.current_pokemon_data_frame['Type 2']}", font=('Helvetica bold', 26))
         
-        self.pokedex_num = tk.Label(frame, text="#:")
-        self.pokedex_num_val = tk.Label(frame, text=self.current_pokemon_data_frame["#"])
+        self.pokedex_num = tk.Label(frame, text="#:", font=('Helvetica', 14))
+        self.pokedex_num_val = tk.Label(frame, text=self.current_pokemon_data_frame["#"], font=('Helvetica', 14))
         
-        self.name = tk.Label(frame, text="Name:")
-        self.name_value = tk.Label(frame, text=self.current_pokemon_data_frame['Name'])
+        self.name = tk.Label(frame, text="Name:", font=('Helvetica', 14))
+        self.name_value = tk.Label(frame, text=self.current_pokemon_data_frame['Name'], font=('Helvetica', 14))
         
-        self.total = tk.Label(frame, text="Total:")
-        self.total_val = tk.Label(frame, text=self.current_pokemon_data_frame["Total"])
+        self.total = tk.Label(frame, text="Total:", font=('Helvetica', 14))
+        self.total_val = tk.Label(frame, text=self.current_pokemon_data_frame["Total"], font=('Helvetica', 14))
         
-        self.hp = tk.Label(frame, text="HP:")
-        self.hp_val = tk.Label(frame, text=self.current_pokemon_data_frame["HP"])
+        self.hp = tk.Label(frame, text="HP:", font=('Helvetica', 14))
+        self.hp_val = tk.Label(frame, text=self.current_pokemon_data_frame["HP"], font=('Helvetica', 14))
         
-        self.attack = tk.Label(frame, text="Attack:")
-        self.attack_val = tk.Label(frame, text=self.current_pokemon_data_frame["Attack"])
+        self.attack = tk.Label(frame, text="Attack:", font=('Helvetica', 14))
+        self.attack_val = tk.Label(frame, text=self.current_pokemon_data_frame["Attack"], font=('Helvetica', 14))
         
-        self.defense = tk.Label(frame, text="Defense:")
-        self.defense_val = tk.Label(frame, text=self.current_pokemon_data_frame["Defense"])
+        self.defense = tk.Label(frame, text="Defense:", font=('Helvetica', 14))
+        self.defense_val = tk.Label(frame, text=self.current_pokemon_data_frame["Defense"], font=('Helvetica', 14))
         
-        self.sp_atk = tk.Label(frame, text="Special Attack:")
-        self.sp_atk_val = tk.Label(frame, text=self.current_pokemon_data_frame["Sp. Atk"])
+        self.sp_atk = tk.Label(frame, text="Special Attack:", font=('Helvetica', 14))
+        self.sp_atk_val = tk.Label(frame, text=self.current_pokemon_data_frame["Sp. Atk"], font=('Helvetica', 14))
         
-        self.sp_def = tk.Label(frame, text="Special Defense:")
-        self.sp_def_val = tk.Label(frame, text=self.current_pokemon_data_frame["Sp. Def"])
+        self.sp_def = tk.Label(frame, text="Special Defense:", font=('Helvetica', 14))
+        self.sp_def_val = tk.Label(frame, text=self.current_pokemon_data_frame["Sp. Def"], font=('Helvetica', 14))
         
-        self.speed = tk.Label(frame, text="Speed:")
-        self.speed_val = tk.Label(frame, text=self.current_pokemon_data_frame["Speed"])
+        self.speed = tk.Label(frame, text="Speed:", font=('Helvetica', 14))
+        self.speed_val = tk.Label(frame, text=self.current_pokemon_data_frame["Speed"], font=('Helvetica', 14))
         
-        self.gen = tk.Label(frame, text="Generation:")
-        self.gen_val = tk.Label(frame, text=self.current_pokemon_data_frame["Generation"])
+        self.gen = tk.Label(frame, text="Generation:", font=('Helvetica', 14))
+        self.gen_val = tk.Label(frame, text=self.current_pokemon_data_frame["Generation"], font=('Helvetica', 14))
         
-        self.legen = tk.Label(frame, text="Legendary:")
-        self.legen_val = tk.Label(frame, text=self.current_pokemon_data_frame["Legendary"])
+        self.legen = tk.Label(frame, text="Legendary:", font=('Helvetica', 14))
+        self.legen_val = tk.Label(frame, text=self.current_pokemon_data_frame["Legendary"], font=('Helvetica', 14))
         
         #place into program
         self.poke_image_label.grid(row=0, sticky="EW", columnspan=2)
@@ -149,10 +149,12 @@ class PokemonStatPage(tk.Frame):
         """
         frame = self.frame2
         # create tree view for select pokemon
-        self.poke_list = ttk.Treeview(frame, columns=("pokedex #", "Name"), show='headings', selectmode='browse', height=20)
+        self.poke_list = ttk.Treeview(frame, columns=("pokedex #", "Name"), show='headings', selectmode='browse', height=24)
         # name the column
         self.poke_list.heading("pokedex #", text="pokedex #")
+        self.poke_list.column("pokedex #", width=75)
         self.poke_list.heading("Name", text="Name")
+        
         # add pokemon to tree view
         for tuple, series in self.pokemon_df.iterrows():
             self.poke_list.insert(parent="", index="end",iid=series["#"], values=(series["#"], series["Name"]))
@@ -184,7 +186,7 @@ class PokemonStatPage(tk.Frame):
         frame = self.frame1
         # change image
         self.image_path = f"data/sprite/{self.current_pokemon_data_frame['#']}.png"
-        self.image = ImageTk.PhotoImage(Image.open(self.image_path))
+        self.image = ImageTk.PhotoImage(Image.open(self.image_path).resize((192, 192)))
         self.poke_image_label["image"] = self.image
         
         # change poke info
@@ -201,12 +203,30 @@ class PokemonStatPage(tk.Frame):
         self.gen_val["text"] = self.current_pokemon_data_frame["Generation"]
         self.legen_val["text"] = self.current_pokemon_data_frame["Legendary"]
         
-        
 
 class PokemonGraphPage(tk.Frame):
     def  __init__(self, master):
         super().__init__(master)
-        self.label1 = tk.Label(self, text="PokemonGraphPage").grid()
+        self.master = master
+        self.create_frame()
+
+    def create_frame(self):
+        """
+        create both frame for the page
+        """
+        self.frame1 = ttk.Frame(self)
+        self.frame2 = ttk.Frame(self)
+        self.frame1.grid(row = 0, column=0,)
+        self.frame2.grid(row = 0, column=1)
+        # self.frame1_widget()
+        self.frame2_widget() 
+        
+    def frame2_widget(self):
+        """
+        """
+        frame = self.frame2
+        self.graph_list = ttk.Treeview(frame)
+        self.graph_list.pack()
 
 class PokemonComparePage(tk.Frame):
     def  __init__(self, master):
