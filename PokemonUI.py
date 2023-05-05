@@ -7,6 +7,9 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from PIL import ImageTk, Image
 from PokemonFacadeController import PokemonFacadeController
+from threading import Thread
+
+
 class App(tk.Tk):
 
     def __init__(self):
@@ -15,18 +18,21 @@ class App(tk.Tk):
         self.frame = None
         self.create_button_frame()
         self.switch_page(PokemonGraphPage(self))
-        self.geometry("1000x750")
+        self.geometry("1000x800")
         self.title("Pokémon Scuffed Buddy")
+        self.grid_rowconfigure(0, weight=0)
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_columnconfigure(0, weight=1)
 
     def switch_page(self, page):
         if self.frame is not None:
             self.frame.destroy()
         new_frame = page
         self.frame = new_frame
-        self.frame.grid(row=1, column=0, ipadx=100)
+        self.frame.grid(row=1, sticky="N")
 
-    def create_button_frame(self):
-        self.button_frame = ttk.Frame(self, height=1000, width=1000)
+    def create_button_frame(self,):
+        self.button_frame = ttk.LabelFrame(self, text="")
         self.button1 = tk.Button(self.button_frame, text="Pokemon Stat",command=lambda: self.switch_page(PokemonStatPage(self)))
         self.button2 = tk.Button(self.button_frame, text="Pokemon Graph", command=lambda: self.switch_page(PokemonGraphPage(self)))
         self.button3 = tk.Button(self.button_frame, text="Pokemon Compare", command=lambda: self.switch_page(PokemonComparePage(self)))
@@ -35,7 +41,7 @@ class App(tk.Tk):
         self.button2.grid(row=0, column=0, sticky="WE", padx=(10, 10))
         self.button3.grid(row=0, column=2, sticky="WE", padx=(10, 10))
         self.button4.grid(row=0, column=3, sticky="WE", padx=(10, 10))
-        self.button_frame.grid(row=0, column=0, sticky="W")
+        self.button_frame.grid(row=0, sticky="ns")
         
         
 class PokemonStatPage(tk.Frame):
@@ -211,8 +217,9 @@ class PokemonStatPage(tk.Frame):
         
 
 class PokemonGraphPage(tk.Frame):
-    def  __init__(self, master):
+    def  __init__(self, master: tk.Tk):
         super().__init__(master)
+        self.master = master
         self.facade = master.facade
         self.create_frame()
 
@@ -222,10 +229,16 @@ class PokemonGraphPage(tk.Frame):
         """
         self.frame1 = ttk.Frame(self)
         self.frame2 = ttk.Frame(self)
+        self.frame3 = ttk.LabelFrame(self, text="Place Holder")
         self.frame1.grid(row = 0, column=0, sticky="N")
         self.frame2.grid(row = 0, column=1, sticky="N")
+        self.frame3.grid(row = 1, column=0, sticky="NWSE", columnspan=2)
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=0)
         self.frame1_widget()
         self.frame2_widget() 
+        self.frame3_widget()
     
     def frame1_widget(self):
         frame = self.frame1
@@ -233,6 +246,7 @@ class PokemonGraphPage(tk.Frame):
         self.axes = self.fig.add_subplot()
         self.facade.get_relationship_g("Attack", "Defense", self.axes)
         self.casvas = FigureCanvasTkAgg(self.fig, master=frame)
+        self.describe = None
         self.casvas.get_tk_widget().grid()
         self.casvas.draw()
     
@@ -241,37 +255,128 @@ class PokemonGraphPage(tk.Frame):
         """
         # create tree for selecting graph
         frame = self.frame2
-        self.graph_list = ttk.Treeview(frame, columns=("Graph"), show='headings', selectmode='browse', height=35)
+        self.graph_list = ttk.Treeview(frame, columns=("Graph"), show='headings', selectmode='browse', height=32)
         self.graph_list.heading("Graph", text="Graph")
         self.graph_list.column("Graph", width=375)
-        self.graph_list.bind("<<TreeviewSelect>>",self.update_plot)
+        self.graph_list.bind("<<TreeviewSelect>>", self.update_plot)
         self.add_selecting_graph()
-        self.graph_list.pack()
+        self.graph_list.grid(sticky="WENS")
+        
+    def frame3_widget(self):
+        self.corr = tk.Label(self.frame3, text="Place Holder")
+        self.corr.grid()
         
     def add_selecting_graph(self):
         list = self.graph_list
+        # distribution graph
         list.insert(parent="", index="end", values="Distibution\ of\ Attack")
         list.insert(parent="", index="end", values="Distibution\ of\ Defense")
         list.insert(parent="", index="end", values="Distibution\ of\ Hitpoint")
-        list.insert(parent="", index="end", values="Distibution\ of\ Special Attack")
-        list.insert(parent="", index="end", values="Distibution\ of\ Special Defens")
+        list.insert(parent="", index="end", values="Distibution\ of\ Special\ Attack")
+        list.insert(parent="", index="end", values="Distibution\ of\ Special\ Defends")
         list.insert(parent="", index="end", values="Distibution\ of\ Speed")
+        # part to whole graph
+        list.insert(parent="", index="end", values="Proportion\ of\ Generation")
+        # Network graph
         list.insert(parent="", index="end", values="Network\ Graph\ of\ Type\ Chart")
         list.insert(parent="", index="end", values="Network\ Graph\ of\ Fire\ Type")
         list.insert(parent="", index="end", values="Network\ Graph\ of\ Water\ Type")
         list.insert(parent="", index="end", values="Network\ Graph\ of\ Grass\ Type")
+        # relation graph
         list.insert(parent="", index="end", values="Relationship\ between\ Attack\ and\ Defense")
         list.insert(parent="", index="end", values="Relationship\ between\ Special\ Attack\ and\ Special\ Defense")
         list.insert(parent="", index="end", values="Relationship\ between\ Hitpoint\ and\ Speed")
+        # bar graph
+        list.insert(parent="", index="end", values="Main\ type\ Frequency")
         
         
     def update_plot(self, event):
-        pass
+        self.selected_g = self.graph_list.item(self.graph_list.focus())["values"][0]
+        
+        if self.selected_g == "Distibution of Attack":
+            self.axes.clear()
+            self.describe = self.facade.get_attribute_dis_g("Attack", self.axes)
+            self.fig.tight_layout()
+            self.casvas.draw()
+        elif self.selected_g == "Distibution of Defense":
+            self.axes.clear()
+            self.describe = self.facade.get_attribute_dis_g("Defense", self.axes)
+            self.casvas.draw()
+        elif self.selected_g == "Distibution of Hitpoint":
+            self.axes.clear()
+            self.describe = self.facade.get_attribute_dis_g("HP", self.axes)
+            self.casvas.draw()
+        elif self.selected_g == "Distibution of Special Attack":
+            self.axes.clear()
+            self.describe = self.facade.get_attribute_dis_g("Sp. Atk", self.axes)
+            self.casvas.draw()
+        elif self.selected_g == "Distibution of Special Defends":
+            self.axes.clear()
+            self.describe = self.facade.get_attribute_dis_g("Sp. Def", self.axes)
+            self.casvas.draw()
+        elif self.selected_g == "Distibution of Speed":
+            self.axes.clear()
+            self.describe = self.facade.get_attribute_dis_g("Speed", self.axes)
+            self.casvas.draw()
+            
+        elif self.selected_g == "Proportion of Generation":
+            self.axes.clear()
+            self.facade.get_generation_part_to_whole_g(self.axes)
+            self.describe = None
+            self.casvas.draw()
+            
+        elif self.selected_g == "Network Graph of Type Chart":
+            self.axes.clear()
+            self.facade.get_all_type_network_g(self.axes)
+            self.describe = None  
+            self.casvas.draw()
+            self.fig.delaxes(self.axes)
+            self.axes = self.fig.add_subplot()
+
+        elif self.selected_g == "Network Graph of Fire Type":
+            self.axes.clear()
+            self.facade.get_one_type_chart_g("Fire", self.axes)
+            self.describe = None
+            self.casvas.draw()
+            self.fig.delaxes(self.axes)
+            self.axes = self.fig.add_subplot()
+        elif self.selected_g == "Network Graph of Water Type":
+            self.axes.clear()
+            self.facade.get_one_type_chart_g("Water", self.axes)
+            self.describe = None
+            self.casvas.draw()
+            self.fig.delaxes(self.axes)
+            self.axes = self.fig.add_subplot()
+        elif self.selected_g == "Network Graph of Grass Type":
+            self.axes.clear()
+            self.facade.get_one_type_chart_g("Grass", self.axes)
+            self.describe = None
+            self.casvas.draw()
+            self.fig.delaxes(self.axes)
+            self.axes = self.fig.add_subplot()
+            
+        elif self.selected_g == "Relationship between Attack and Defense":
+            self.axes.clear()
+            self.describe = self.facade.get_relationship_g("Attack", "Defense", self.axes)
+            self.casvas.draw()
+        elif self.selected_g == "Relationship between Special Attack and Special Defense":
+            self.axes.clear()
+            self.describe = self.facade.get_relationship_g("Sp. Atk", "Sp. Def", self.axes)
+            self.casvas.draw()
+        elif self.selected_g == "Relationship between Hitpoint and Speed":
+            self.axes.clear()
+            self.describe = self.facade.get_relationship_g("HP", "Speed", self.axes)
+            self.casvas.draw()
+            
+        elif self.selected_g == "Main type Frequency":
+            self.axes.clear()
+            self.facade.get_main_type_frequency_g(self.axes)
+            self.casvas.draw()
 
 class PokemonComparePage(tk.Frame):
     def  __init__(self, master):
         super().__init__(master)
-        self.lable1 = tk.Label(self, text="PokemonComparePage").grid()
+        self.lable1 = tk.Label(self, text="PokemonComparePage PlaceHolder").grid()
 
 
 if __name__ == "__main__":

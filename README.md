@@ -29,4 +29,7 @@ Anything else you would like to include.  Anything you think is important or
 interesting that you learned.  For example, any interesting libraries or
 packages you use in your application.
 
-![ex1](data/image_for_readme/ui_ex1.png)
+
+<img src="https://github.com/ReggieReo/classdiagram/blob/main/graph_ex.png?raw=true" width="500">
+  
+<img src="https://raw.githubusercontent.com/ReggieReo/classdiagram/main/stat_ex.png" width="500">

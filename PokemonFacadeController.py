@@ -21,17 +21,17 @@ class PokemonFacadeController:
     def get_relationship_g(self, type1: str, type2: str, ax):
         return self.__manager.get_relationship_g(type1, type2, ax)
     
-    def get_attribute_dis_g(self, attribute: str):
-        return self.__manager.get_attribute_dis_g(attribute)
+    def get_attribute_dis_g(self, attribute: str, ax):
+        return self.__manager.get_attribute_dis_g(attribute, ax)
     
-    def get_generation_part_to_whole_g(self):
-        return self.__manager.get_generation_part_to_whole_g()
+    def get_generation_part_to_whole_g(self, ax):
+        return self.__manager.get_generation_part_to_whole_g(ax)
     
-    def get_all_type_network_g(self):
-        return self.__manager.get_all_type_network_g()
+    def get_all_type_network_g(self, ax):
+        return self.__manager.get_all_type_network_g(ax)
     
-    def get_one_type_chart_g(self, type: str):
-        return self.__manager.get_one_type_chart_g(type)
+    def get_one_type_chart_g(self, type: str, ax):
+        return self.__manager.get_one_type_chart_g(type, ax)
     
     def get_pokemon_object(self, name: str):
         df = self.__manager.get_pokemon_data()
@@ -49,11 +49,9 @@ class PokemonFacadeController:
 if __name__ == "__main__":
     pokemon_controller = PokemonFacadeController()
     # pokemon_controller.get_all_type_network_g()
-    fig, des = pokemon_controller.get_attribute_dis_g("Attack")
     # # pokemon_controller.get_generation_part_to_whole_g()
     # pokemon_controller.get_one_type_chart_g("Normal")
     # poke = pokemon_controller.get_pokemon_object("pikachu")
     # plt.show()
     # print(type(poke.get_type2()))
-    print(f"{des['mean']:.2f}")
     # print(pokemon_controller.get_pokemon_data())

@@ -16,30 +16,38 @@ class PokemonManager:
         return self.__pokemon_data
 
     def get_main_type_frequency_g(self, ax):  # frequency graph of main type
-        # figure = plt.figure()
         ax = self.__pokemon_data["Type 1"].value_counts().plot.bar(ax=ax)
         ax.set_title("Main type Frequency")
-        # return figure
 
     def get_relationship_g(self, type1, type2, ax):  # scatterplot of two attibute
         ax = sns.scatterplot(
             data=self.__pokemon_data, x=type1, y=type2, hue="Generation"
         , ax=ax)
-        return ax
 
     def get_attribute_dis_g(self, attribute, ax):  # distribution graph of attack
         sns.histplot(data=self.__pokemon_data[attribute], ax=ax)
+        ax.set_title(f"Distribution of {attribute}")
+        ax.set_aspect("auto")
+        ax.set_frame_on(True)
+        ax.grid(color='grey', linestyle='-', linewidth=1, axis="y", alpha=0.5)
+        ax.set_xlabel(attribute)
+        ax.set_ylabel("Frequency")
         return self.__pokemon_data[attribute].describe()
 
     def get_generation_part_to_whole_g(self, ax):  # part of whole graph of generation
-            self.__pokemon_data["Generation"].value_counts().sort_index().plot(
-                kind="pie",
-                y="Generation",
-                title="lol",
-                autopct="%.2f%%",
-                legend=True,
-                ax=ax
-                )
+            ax.pie(x=self.__pokemon_data["Generation"].value_counts()
+                    .sort_index(), 
+                    autopct="%.2f%%",
+                    labels=["Generation 1",
+                            "Generation 2",
+                            "Generation 3",
+                            "Generation 4",
+                            "Generation 5"],
+                    
+                    )
+            ax.set_title("Proportion of Generation")
+            ax.set_aspect("auto")
+            ax.grid(color='r', linestyle='-', linewidth=2)
 
     def get_all_type_network_g(self, ax): # all type to all type network
         G = nx.DiGraph()
@@ -53,8 +61,9 @@ class PokemonManager:
                     G.add_edge(u_of_edge=label, v_of_edge=type2, weight=l)
         pos = nx.circular_layout(G)
         nx.draw(G, pos=pos, with_labels=True, ax=ax)
+        ax.set_title("Type Chart")
 
-    def get_one_type_chart_g(self, type: str, ax): # one type to all network 
+    def get_one_type_chart_g(self, type: str, ax: plt.Axes): # one type to all network 
         df = self.__type_data.set_index("Attacking")[type]
         G = nx.DiGraph()
         for node in df.index:
@@ -63,9 +72,10 @@ class PokemonManager:
             if effectiveness != 0:
                 G.add_edge(u_of_edge=type, v_of_edge=type2, weight=effectiveness)
         pos = nx.shell_layout(G)
-        plot = nx.draw(G, pos=pos, with_labels=True)
+        nx.draw(G, pos=pos, with_labels=True, ax=ax)
         weight = nx.get_edge_attributes(G, "weight")
         nx.draw_networkx_edge_labels(G, pos, edge_labels=weight, ax=ax)
+        ax.set_title("Fire type relationship")
 
 if __name__ == "__main__":
     manager = PokemonManager()
@@ -74,5 +84,6 @@ if __name__ == "__main__":
     # manager.get_generation_part_to_whole_g(ax)
     # manager.get_all_type_network_g(ax)
     manager.get_one_type_chart_g("Normal", ax)
+    # manager.get_generation_part_to_whole_g(ax)
     plt.show()
     # print(des)
