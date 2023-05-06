@@ -23,6 +23,10 @@ class PokemonManager:
         ax = sns.scatterplot(
             data=self.__pokemon_data, x=type1, y=type2, hue="Generation"
         , ax=ax)
+        des1 = self.__pokemon_data[type1].describe()
+        des2 = self.__pokemon_data[type2].describe()
+        corr = self.__pokemon_data[type1].corr(self.__pokemon_data[type2])
+        return des1, des2, corr
 
     def get_attribute_dis_g(self, attribute, ax):  # distribution graph of attack
         sns.histplot(data=self.__pokemon_data[attribute], ax=ax)
@@ -83,7 +87,11 @@ if __name__ == "__main__":
     ax = fig.add_subplot()
     # manager.get_generation_part_to_whole_g(ax)
     # manager.get_all_type_network_g(ax)
-    manager.get_one_type_chart_g("Normal", ax)
+    # manager.get_one_type_chart_g("Normal", ax)
     # manager.get_generation_part_to_whole_g(ax)
-    plt.show()
+    des1, des2, corr = manager.get_relationship_g("Attack", "Speed", ax)
+    print(des1)
+    print(des2)
+    print(corr)
+    # plt.show()
     # print(des)

@@ -18,7 +18,7 @@ class App(tk.Tk):
         self.frame = None
         self.create_button_frame()
         self.switch_page(PokemonGraphPage(self))
-        self.geometry("1000x800")
+        self.geometry("1000x750")
         self.title("Pokémon Scuffed Buddy")
         self.grid_rowconfigure(0, weight=0)
         self.grid_rowconfigure(1, weight=1)
@@ -229,13 +229,18 @@ class PokemonGraphPage(tk.Frame):
         """
         self.frame1 = ttk.Frame(self)
         self.frame2 = ttk.Frame(self)
-        self.frame3 = ttk.LabelFrame(self, text="Place Holder")
-        self.frame1.grid(row = 0, column=0, sticky="N")
-        self.frame2.grid(row = 0, column=1, sticky="N")
-        self.frame3.grid(row = 1, column=0, sticky="NWSE", columnspan=2)
+        self.frame3 = ttk.Frame(self)
+        self.frame1.grid(row = 0, column=0, sticky="NWSE")
+        self.frame2.grid(row = 0, column=1, sticky="NWSE")
+        self.frame3.grid(row = 1, column=0, sticky="NS", columnspan=2)
+        
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=0)
+        
+        self.frame3.grid_columnconfigure(0, weight=1)
+        self.frame3.grid_rowconfigure(0, weight=1)
+        
         self.frame1_widget()
         self.frame2_widget() 
         self.frame3_widget()
@@ -247,6 +252,7 @@ class PokemonGraphPage(tk.Frame):
         self.facade.get_relationship_g("Attack", "Defense", self.axes)
         self.casvas = FigureCanvasTkAgg(self.fig, master=frame)
         self.describe = None
+        self.number_att = 0
         self.casvas.get_tk_widget().grid()
         self.casvas.draw()
     
@@ -263,8 +269,8 @@ class PokemonGraphPage(tk.Frame):
         self.graph_list.grid(sticky="WENS")
         
     def frame3_widget(self):
-        self.corr = tk.Label(self.frame3, text="Place Holder")
-        self.corr.grid()
+        self.corr = tk.Button(self.frame3, text="Descriptive statistics and Correlation", command= lambda: self.static_page(), font="30")
+        self.corr.grid(row=0, column=0, sticky="")
         
     def add_selecting_graph(self):
         list = self.graph_list
@@ -296,39 +302,47 @@ class PokemonGraphPage(tk.Frame):
         if self.selected_g == "Distibution of Attack":
             self.axes.clear()
             self.describe = self.facade.get_attribute_dis_g("Attack", self.axes)
+            self.number_att = 1
             self.fig.tight_layout()
             self.casvas.draw()
         elif self.selected_g == "Distibution of Defense":
             self.axes.clear()
             self.describe = self.facade.get_attribute_dis_g("Defense", self.axes)
+            self.number_att = 1
             self.casvas.draw()
         elif self.selected_g == "Distibution of Hitpoint":
             self.axes.clear()
             self.describe = self.facade.get_attribute_dis_g("HP", self.axes)
+            self.number_att = 1
             self.casvas.draw()
         elif self.selected_g == "Distibution of Special Attack":
             self.axes.clear()
             self.describe = self.facade.get_attribute_dis_g("Sp. Atk", self.axes)
+            self.number_att = 1
             self.casvas.draw()
         elif self.selected_g == "Distibution of Special Defends":
             self.axes.clear()
             self.describe = self.facade.get_attribute_dis_g("Sp. Def", self.axes)
+            self.number_att = 1
             self.casvas.draw()
         elif self.selected_g == "Distibution of Speed":
             self.axes.clear()
             self.describe = self.facade.get_attribute_dis_g("Speed", self.axes)
+            self.number_att = 1
             self.casvas.draw()
             
         elif self.selected_g == "Proportion of Generation":
             self.axes.clear()
             self.facade.get_generation_part_to_whole_g(self.axes)
             self.describe = None
+            self.number_att = 0
             self.casvas.draw()
             
         elif self.selected_g == "Network Graph of Type Chart":
             self.axes.clear()
             self.facade.get_all_type_network_g(self.axes)
             self.describe = None  
+            self.number_att = 0
             self.casvas.draw()
             self.fig.delaxes(self.axes)
             self.axes = self.fig.add_subplot()
@@ -337,6 +351,7 @@ class PokemonGraphPage(tk.Frame):
             self.axes.clear()
             self.facade.get_one_type_chart_g("Fire", self.axes)
             self.describe = None
+            self.number_att = 0
             self.casvas.draw()
             self.fig.delaxes(self.axes)
             self.axes = self.fig.add_subplot()
@@ -344,6 +359,7 @@ class PokemonGraphPage(tk.Frame):
             self.axes.clear()
             self.facade.get_one_type_chart_g("Water", self.axes)
             self.describe = None
+            self.number_att = 0
             self.casvas.draw()
             self.fig.delaxes(self.axes)
             self.axes = self.fig.add_subplot()
@@ -351,28 +367,84 @@ class PokemonGraphPage(tk.Frame):
             self.axes.clear()
             self.facade.get_one_type_chart_g("Grass", self.axes)
             self.describe = None
+            self.number_att = 0
             self.casvas.draw()
             self.fig.delaxes(self.axes)
             self.axes = self.fig.add_subplot()
             
         elif self.selected_g == "Relationship between Attack and Defense":
             self.axes.clear()
-            self.describe = self.facade.get_relationship_g("Attack", "Defense", self.axes)
+            self.describe_1, self.describe_2, self.correlation = self.facade.get_relationship_g("Attack", "Defense", self.axes)
+            self.number_att = 2
             self.casvas.draw()
         elif self.selected_g == "Relationship between Special Attack and Special Defense":
             self.axes.clear()
-            self.describe = self.facade.get_relationship_g("Sp. Atk", "Sp. Def", self.axes)
+            self.describe_1, self.describe_2, self.correlation = self.facade.get_relationship_g("Sp. Atk", "Sp. Def", self.axes)
+            self.number_att = 2
             self.casvas.draw()
         elif self.selected_g == "Relationship between Hitpoint and Speed":
             self.axes.clear()
-            self.describe = self.facade.get_relationship_g("HP", "Speed", self.axes)
+            self.describe_1, self.describe_2, self.correlation = self.facade.get_relationship_g("HP", "Speed", self.axes)
+            self.number_att = 2
             self.casvas.draw()
             
         elif self.selected_g == "Main type Frequency":
             self.axes.clear()
             self.facade.get_main_type_frequency_g(self.axes)
+            self.number_att = 0
             self.casvas.draw()
+            
+    def static_page(self):
+        static_window = tk.Toplevel(self)
+        close_button = tk.Button(static_window, command=lambda: self.destroy_descriptive_window(static_window), text="Close")
+        static_window.bind("<FocusOut>", lambda e: self.destroy_descriptive_window(static_window))
+        static_window.geometry("500x500")
+        self.corr.configure(state="disabled")
+        if self.number_att == 0:
+            static_window.grid_columnconfigure(0, weight=1)
+            static_window.grid_rowconfigure(0, weight=1)
+            label = tk.Label(static_window, text="There are no \ndescriptive statistics and correlation\n of this attrbute.")
+            label.grid(row=0, column=0, sticky="NWSE")
+            close_button.grid(row=1, column=0)
+        if self.number_att == 1:
+            static_window.grid_columnconfigure(0, weight=1)
+            static_window.grid_rowconfigure(0, weight=1)
+            static_window.grid_rowconfigure(1, weight=2)
+            static_window.grid_rowconfigure(2, weight=0)
+            title = tk.Label(static_window, text=f"Descriptive statistics of {' '.join(self.selected_g.split(' ')[2::]).lower()}")
+            label = tk.Label(static_window, text=self.describe)
+            title.grid(row=0, column=0, sticky="SN")
+            label.grid(row=1, column=0, sticky="N")
+            close_button.grid(row=2, column=0)
+            
+        if self.number_att == 2:
+            title = tk.Label(static_window, text=f"Descriptive statistics of {' '.join(self.selected_g.split(' ')[2::]).lower()}")
+            des_1 = tk.Label(static_window, text=self.describe_1)
+            des_2 = tk.Label(static_window, text=self.describe_2)
+            title_2 = tk.Label(static_window, text=f"Correlation of {' '.join(self.selected_g.split(' ')[2::]).lower()}")
+            correlation = tk.Label(static_window, text=f"{self.correlation}")
+            
+            static_window.grid_columnconfigure(0, weight=1)
+            static_window.grid_columnconfigure(1, weight=1)
+            static_window.grid_rowconfigure(0, weight=1)
+            static_window.grid_rowconfigure(1, weight=1)
+            static_window.grid_rowconfigure(2, weight=1)
+            static_window.grid_rowconfigure(3, weight=1)
+            static_window.grid_rowconfigure(4, weight=1)
+            
+            title.grid(row=0, column=0, columnspan=2, sticky="S")
+            des_1.grid(row=1, column=0)
+            des_2.grid(row=1, column=1)
+            title_2.grid(row=2, column=0, columnspan=2, sticky="S")
+            correlation.grid(row=4, column=0, columnspan=2, sticky="N")
+            close_button.grid(row=5, column=0, columnspan=2)
+            
 
+    def destroy_descriptive_window(self, master: tk.Toplevel):
+        self.corr.configure(state="normal")
+        master.destroy()
+        
+        
 class PokemonComparePage(tk.Frame):
     def  __init__(self, master):
         super().__init__(master)
