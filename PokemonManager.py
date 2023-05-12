@@ -21,8 +21,8 @@ class PokemonManager:
 
     def get_relationship_g(self, type1, type2, ax):  # scatterplot of two attibute
         ax = sns.scatterplot(
-            data=self.__pokemon_data, x=type1, y=type2, hue="Generation"
-        , ax=ax)
+            data=self.__pokemon_data, x=type1, y=type2, hue="Generation", ax=ax
+        )
         des1 = self.__pokemon_data[type1].describe()
         des2 = self.__pokemon_data[type2].describe()
         corr = self.__pokemon_data[type1].corr(self.__pokemon_data[type2])
@@ -33,27 +33,28 @@ class PokemonManager:
         ax.set_title(f"Distribution of {attribute}")
         ax.set_aspect("auto")
         ax.set_frame_on(True)
-        ax.grid(color='grey', linestyle='-', linewidth=1, axis="y", alpha=0.5)
+        ax.grid(color="grey", linestyle="-", linewidth=1, axis="y", alpha=0.5)
         ax.set_xlabel(attribute)
         ax.set_ylabel("Frequency")
         return self.__pokemon_data[attribute].describe()
 
     def get_generation_part_to_whole_g(self, ax):  # part of whole graph of generation
-            ax.pie(x=self.__pokemon_data["Generation"].value_counts()
-                    .sort_index(), 
-                    autopct="%.2f%%",
-                    labels=["Generation 1",
-                            "Generation 2",
-                            "Generation 3",
-                            "Generation 4",
-                            "Generation 5"],
-                    
-                    )
-            ax.set_title("Proportion of Generation")
-            ax.set_aspect("auto")
-            ax.grid(color='r', linestyle='-', linewidth=2)
+        ax.pie(
+            x=self.__pokemon_data["Generation"].value_counts().sort_index(),
+            autopct="%.2f%%",
+            labels=[
+                "Generation 1",
+                "Generation 2",
+                "Generation 3",
+                "Generation 4",
+                "Generation 5",
+            ],
+        )
+        ax.set_title("Proportion of Generation")
+        ax.set_aspect("auto")
+        ax.grid(color="r", linestyle="-", linewidth=2)
 
-    def get_all_type_network_g(self, ax): # all type to all type network
+    def get_all_type_network_g(self, ax):  # all type to all type network
         G = nx.DiGraph()
         df = self.__type_data.copy()
         df.set_index("Attacking", inplace=True)
@@ -67,31 +68,103 @@ class PokemonManager:
         nx.draw(G, pos=pos, with_labels=True, ax=ax)
         ax.set_title("Type Chart")
 
-    def get_one_type_chart_g(self, type: str, ax: plt.Axes): # one type to all network 
-        df = self.__type_data.set_index("Attacking")[type]
+    def get_one_type_chart_g(self, type: str, ax: plt.Axes):  # one type to all network
+        poke_type = [
+            "Normal",
+            "Fire",
+            "Water",
+            "Electric",
+            "Grass",
+            "Ice",
+            "Fighting",
+            "Poison",
+            "Ground",
+            "Flying",
+            "Psychic",
+            "Bug",
+            "Rock",
+            "Ghost",
+            "Dragon",
+            "Dark",
+            "Steel",
+            "Fairy",
+        ]
+
+        df = self.__type_data.set_index("Attacking")
         G = nx.DiGraph()
         for node in df.index:
             G.add_node(node)
-        for type2, effectiveness in df.items():
-            if effectiveness != 0:
-                G.add_edge(u_of_edge=type, v_of_edge=type2, weight=effectiveness)
+        for effect_type in poke_type:
+            G.add_edge(
+                u_of_edge=type, v_of_edge=effect_type, weight=df.loc[type, effect_type]
+            )
         pos = nx.shell_layout(G)
         nx.draw(G, pos=pos, with_labels=True, ax=ax)
         weight = nx.get_edge_attributes(G, "weight")
         nx.draw_networkx_edge_labels(G, pos, edge_labels=weight, ax=ax)
         ax.set_title("Fire type relationship")
 
+    def get_hit_effective(self, type1: str, type2: str):
+        type1 = type1.capitalize()
+        type2 = type2.capitalize()
+        poke_type = [
+            "Normal",
+            "Fire",
+            "Water",
+            "Electric",
+            "Grass",
+            "Ice",
+            "Fighting",
+            "Poison",
+            "Ground",
+            "Flying",
+            "Psychic",
+            "Bug",
+            "Rock",
+            "Ghost",
+            "Dragon",
+            "Dark",
+            "Steel",
+            "Fairy",
+        ]
+
+        df = self.__type_data.set_index("Attacking")
+        G = nx.DiGraph()
+        for node in df.index:
+            G.add_node(node)
+        for effect_type in poke_type:
+            G.add_edge(
+                u_of_edge=type1,
+                v_of_edge=effect_type,
+                weight=df.loc[type1, effect_type],
+            )
+        path_length = dict(nx.single_source_dijkstra_path_length(G=G, source=type1))
+        effectiveness = path_length[type2]
+        if type1 == type2:
+            effectiveness = self.__type_data.set_index("Attacking").loc[type1, type2]
+        if effectiveness == 1.0:
+            return "Normal"
+        elif effectiveness == 2.0:
+            return "Not Very Effective"
+        elif effectiveness == 0.5:
+            return "Super Effective"
+        elif effectiveness == 3.0:
+            return "Doesn't Affect"
+
+
 if __name__ == "__main__":
     manager = PokemonManager()
     fig = plt.figure(figsize=(6, 6))
     ax = fig.add_subplot()
+    # x = manager.get_hit_effective(type1="Fire", type2="Water")
+    # print(x)
+    # manager.get_one_type_chart_g("Electric", ax)
     # manager.get_generation_part_to_whole_g(ax)
-    # manager.get_all_type_network_g(ax)
-    # manager.get_one_type_chart_g("Normal", ax)
+    manager.get_all_type_network_g(ax)
     # manager.get_generation_part_to_whole_g(ax)
-    des1, des2, corr = manager.get_relationship_g("Attack", "Speed", ax)
-    print(des1)
-    print(des2)
-    print(corr)
-    # plt.show()
+    # des1, des2, corr = manager.get_relationship_g("Attack", "Speed", ax)
+    # print(des1)
+    # print(des2)
+    # print(corr)
+    plt.show()
     # print(des)
