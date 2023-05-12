@@ -26,6 +26,7 @@ class PokemonManager:
         des1 = self.__pokemon_data[type1].describe()
         des2 = self.__pokemon_data[type2].describe()
         corr = self.__pokemon_data[type1].corr(self.__pokemon_data[type2])
+        ax.set_title(f"Relationship between {type1} and {type2}")
         return des1, des2, corr
 
     def get_attribute_dis_g(self, attribute, ax):  # distribution graph of attack
